@@ -11,10 +11,11 @@ tf.app.flags.DEFINE_integer('max_step', 2000, '訓練ステップ数')
 FLAGS = tf.app.flags.FLAGS
 
 def accuracy(logits, labels):
-    correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    tf.summary.scalar("accuracy", accuracy)
-    return accuracy
+    with tf.name_scope('accuracy'):
+        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+        tf.summary.scalar("accuracy", accuracy)
+        return accuracy
 
 def training(loss, learning_rate):
     train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
@@ -22,9 +23,10 @@ def training(loss, learning_rate):
 
 def loss(logits, labels):
     # 交差エントロピーの計算
-    loss = tf.reduce_mean(-tf.reduce_sum(labels * tf.log(logits + 1e-10), reduction_indices=[1]))
-    tf.summary.scalar("loss", loss)
-    return loss
+    with tf.name_scope('loss'):
+        loss = tf.reduce_mean(-tf.reduce_sum(labels * tf.log(logits + 1e-10), reduction_indices=[1]))
+        tf.summary.scalar("loss", loss)
+        return loss
 
 def convolution(images):
     images = tf.reshape(images, [-1, 28, 28, 1])
